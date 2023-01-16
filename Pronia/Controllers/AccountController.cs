@@ -54,7 +54,7 @@ namespace Pronia.Controllers
         [HttpPost]
         public async Task<IActionResult> Login(UserLoginVM loginVM)
         {
-            if (!ModelState.IsValid) return View();
+            if (!ModelState.IsValid) return Json(ModelState);
 
             AppUser appUser = await _userManager.FindByNameAsync(loginVM.UsernameOrEmail);
 
@@ -63,8 +63,8 @@ namespace Pronia.Controllers
                 appUser = await _userManager.FindByNameAsync(loginVM.UsernameOrEmail);
                 if(appUser is null)
                 {
-                    ModelState.AddModelError("", "Username or Password is wrong");
-                    return View();
+                    ModelState.AddModelError("Other", "Username or Password is wrong");
+                    return Json(ModelState);
                 }
             }
 
@@ -72,10 +72,10 @@ namespace Pronia.Controllers
 
             if (!result.Succeeded)
             {
-                ModelState.AddModelError("", "Username or Password is wrong");
-                return View();
+                ModelState.AddModelError("Other", "Username or Password is wrong");
+                return Json(ModelState);
             }
-            return RedirectToAction("Index","Home");
+            return Content("Ok");
         }
     }
 }

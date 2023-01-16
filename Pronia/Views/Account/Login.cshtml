@@ -26,31 +26,33 @@
         <div class="container">
             <div class="row">
                 <div class="col-lg-12 pt-5 pt-lg-0">
-                    <form method="post">
+                    <form method="post" id="loginform">
                         <div class="login-form">
                             <h4 class="login-title">Register</h4>
                             <div class="row">
                                 <div class="col-md-12">
                                     <label asp-for="UsernameOrEmail">Username Or Email</label>
                                     <input asp-for="UsernameOrEmail" placeholder="Username Or Email" />
-                                    <span asp-validation-for="UsernameOrEmail"></span>
+                                    <span id="UsernameOrEmailErr"></span>
                                 </div>
                                 <div class="col-md-12">
                                     <label asp-for="Password">Password</label>
                                     <input asp-for="Password" placeholder="Password" />
-                                    <span asp-validation-for="Password"></span>
+                                    <span id="PasswordErr"></span>
                                 </div>
                                 <div class="col-md-6">
                                     <label asp-for="IsPresistance">Remember me</label>
                                     <input asp-for="IsPresistance"/>
-                                    <span asp-validation-for="IsPresistance"></span>
+                                    <span id="IsPresistanceErr"></span>
                                 </div>
-                                <div asp-validation-summary="ModelOnly"></div>
+                                <div id="OtherErr"></div>
                                 <a asp-action="Register">Do you need account?</a>
                                 <div class="col-12">
-                                    <button type="submit" class="btn btn-custom-size lg-size btn-pronia-primary">
+                                        <a id="btnsubmit" asp-action="Login" >
+                                         <button type="submit" class="btn btn-custom-size lg-size btn-pronia-primary submitlogin">
                                         Login
-                                    </button>
+                                          </button>
+                                        </a>
                                 </div>
                             </div>
                         </div>
@@ -64,6 +66,62 @@
 
 
 @section scripts{
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validate/1.19.5/jquery.validate.min.js" integrity="sha512-rstIgDs0xPgmG6RX1Aba4KV5cWJbAMcvRCVmglpam9SoHZiUCyQVDdH2LPlxoHtrv17XWblE/V/PP+Tr04hbtA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery-validation-unobtrusive/4.0.0/jquery.validate.unobtrusive.min.js" integrity="sha512-xq+Vm8jC94ynOikewaQXMEkJIOBp7iArs3IhFWSWdRT3Pq8wFz46p+ZDFAR7kHnSFf+zUv52B3prRYnbDRdgog==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script>
+        $(document).ready(function () {
+            $("#btnsubmit").click(function (e) {
+                e.preventDefault()
+                var valdata = $("#loginform").serialize();
+                $.ajax({
+                    url: this.href,
+                    type: "POST",
+                    data: valdata,
+                    success: function(data){
+                        if (data == "Ok"){
+                            window.location.href=(window.location.protocol + "//"+window.location.host);
+                            return "Ok"
+                        }
+                        let PasswordErr = "";
+                        let UsernameErr = "";
+                        let PresistanceErr = "";
+                        let OtherErr = "";
+                        $.each(data, function (i,item) {
+                            
+                            var msg = data[i].errors
+                            if (msg.length > 0) {
+                                $.each(msg, function (k, err) {
+                                    switch (item.key) {
+                                        case "Password":
+                                            PasswordErr += msg[k].errorMessage
+                                            break;
+                                        case "UsernameOrEmail":
+                                            UsernameErr += msg[k].errorMessage
+                                            break;
+                                        case "IsPresistance":
+                                            PresistanceErr += msg[k].errorMessage
+                                            break;
+                                        case "Other":
+                                            OtherErr += msg[k].errorMessage
+                                            break;
+                                        default:
+                                            break;
+                                    }
+                                })
+                            }
+                        });
+
+                        $("#UsernameOrEmailErr").html(UsernameErr)
+                        $("#PasswordErr").html(PasswordErr)
+                        $("#IsPresistanceErr").html(PresistanceErr)
+                        $("#OtherErr").html(OtherErr)
+                    },
+                    error: function (err) {
+                        console.log(err)
+                    }
+                });
+            });
+        });
+    </script>
+
+
+    
 }
